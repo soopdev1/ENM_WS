@@ -186,12 +186,10 @@ public class Operazioni extends HttpServlet {
                                                 String esitoOTP = generaOTP(bandorif, numcell, username);
                                                 if (esitoOTP.equals("SUCCESS")) {
                                                     String dest[] = {email};
-
                                                     String mailreg = replace(dbb.getPath("mail.registrazioneutente"), "@username", username);
                                                     mailreg = replace(mailreg, "@password", pass);
                                                     mailreg = replace(mailreg, "@linkweb", linkweb);
                                                     mailreg = replace(mailreg, "@linknohttpweb", linknohttpweb);
-
                                                     if (!mailreg.equals("-")) {
                                                         String mailsender = dbb.getPath("mailsender");
                                                         boolean es = sendMail(mailsender, dest, new String[]{}, mailreg, mailsender + " Registrazione");
