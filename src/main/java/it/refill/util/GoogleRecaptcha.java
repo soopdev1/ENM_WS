@@ -45,7 +45,7 @@ public class GoogleRecaptcha {
                 wr.writeBytes(postParams);
                 wr.flush();
             }
-            int responseCode = con.getResponseCode();
+//            int responseCode = con.getResponseCode();
             StringBuilder response;
             try (BufferedReader in = new BufferedReader(new InputStreamReader(
                     con.getInputStream()))) {
