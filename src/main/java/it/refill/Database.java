@@ -7,6 +7,7 @@ package it.refill;
 import static it.refill.Utility.sdfITA;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -329,6 +330,28 @@ public class Database {
         }
 
         return out;
+    }
+
+    public String inserisci_risposta(Survey_answer risposta) {
+        try {
+            String ins = "INSERT INTO survey_answer VALUES (?,?,?,?,?,?)";
+            try (PreparedStatement ps = this.c.prepareStatement(ins)) {
+                ps.setLong(1, risposta.getIdallievo());
+                ps.setString(2, risposta.getTipo());
+                ps.setString(3, risposta.getRisposte());
+                ps.setString(4, risposta.getIp());
+                ps.setString(5, risposta.getMac());
+                ps.setDate(6, new java.sql.Date(risposta.getDate().getTime()));
+                ps.execute();
+            }
+            return "1";
+        } catch (Exception e) {
+            if (e.getMessage().toLowerCase().contains("duplicate")) {
+                return "0";
+            }
+            e.printStackTrace();
+            return e.getMessage();
+        }
     }
 
 }
