@@ -4,7 +4,7 @@
 
     <groupId>it.refill</groupId>
     <artifactId>ENM_Accreditamento_DD</artifactId>
-    <version>ENM_Accreditamento_NEET</version>
+    <version>2022</version>
     <packaging>war</packaging>
 
     <name>ENM_Accreditamento_DD</name>
