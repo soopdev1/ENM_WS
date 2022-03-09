@@ -14,9 +14,17 @@ import java.util.List;
 public class Docenti {
 
     int iddocenti;
-    String nome, cognome, codicefiscale, datanascita, fascia, datawebinair,piattaforma;
+    String nome, cognome, codicefiscale, datanascita, fascia, datawebinair,piattaforma,email;
 
     List<Integer> idpr = new ArrayList<>();
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public List<Integer> getIdpr() {
         return idpr;

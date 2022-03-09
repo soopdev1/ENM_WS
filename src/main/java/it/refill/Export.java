@@ -7,14 +7,15 @@ package it.refill;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import static it.refill.Utility.host_DD;
-import static it.refill.Utility.host_NEET;
-import static it.refill.Utility.timestampSQL;
+import static it.refill.Utility.HOSTDD;
+import static it.refill.Utility.HOSTNEET;
+import static it.refill.Utility.TIMESTAMPSQL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
@@ -36,6 +37,7 @@ public class Export {
      * Creates a new instance of Export
      */
     public Export() {
+        Logger.getLogger("Export").info("");
     }
 
     @GET
@@ -50,9 +52,9 @@ public class Export {
     }
 
     @POST
-    @Path("/pfstart")
+    @Path("/list_pf")
     @Produces("application/json")
-    public Response pfstart(@FormParam("username") String username, @FormParam("password") String password) {
+    public Response list_pf(@FormParam("username") String username, @FormParam("password") String password) {
         if (username == null) {
             username = "";
         }
@@ -63,7 +65,7 @@ public class Export {
             List<Pfstart> out = new ArrayList<>();
             //NEET
             try {
-                Database db1 = new Database(host_NEET);
+                Database db1 = new Database(HOSTNEET);
                 List<Pfstart> neet = db1.list_pfstart(true);
                 db1.closeDB();
                 out.addAll(neet);
@@ -72,7 +74,7 @@ public class Export {
             }
             //D&D
             try {
-                Database db1 = new Database(host_DD);
+                Database db1 = new Database(HOSTDD);
                 List<Pfstart> ded = db1.list_pfstart(false);
                 db1.closeDB();
                 out.addAll(ded);
@@ -100,7 +102,7 @@ public class Export {
             List<Discenti> out = new ArrayList<>();
             //NEET
             try {
-                Database db1 = new Database(host_NEET);
+                Database db1 = new Database(HOSTNEET);
                 List<Discenti> neet = db1.list_discenti(true);
                 db1.closeDB();
                 out.addAll(neet);
@@ -109,7 +111,7 @@ public class Export {
             }
             //D&D
             try {
-                Database db1 = new Database(host_DD);
+                Database db1 = new Database(HOSTDD);
                 List<Discenti> ded = db1.list_discenti(false);
                 db1.closeDB();
                 out.addAll(ded);
@@ -136,7 +138,7 @@ public class Export {
             List<SA> out = new ArrayList<>();
             //NEET
             try {
-                Database db1 = new Database(host_NEET);
+                Database db1 = new Database(HOSTNEET);
                 List<SA> neet = db1.list_sa(true);
                 db1.closeDB();
                 out.addAll(neet);
@@ -145,7 +147,7 @@ public class Export {
             }
             //D&D
             try {
-                Database db1 = new Database(host_DD);
+                Database db1 = new Database(HOSTDD);
                 List<SA> ded = db1.list_sa(false);
                 db1.closeDB();
                 out.addAll(ded);
@@ -172,7 +174,7 @@ public class Export {
             List<Docenti> out = new ArrayList<>();
             //NEET
             try {
-                Database db1 = new Database(host_NEET);
+                Database db1 = new Database(HOSTNEET);
                 List<Docenti> neet = db1.list_docenti(true);
                 db1.closeDB();
                 out.addAll(neet);
@@ -181,7 +183,7 @@ public class Export {
             }
             //D&D
             try {
-                Database db1 = new Database(host_DD);
+                Database db1 = new Database(HOSTDD);
                 List<Docenti> ded = db1.list_docenti(false);
                 db1.closeDB();
                 out.addAll(ded);
@@ -213,17 +215,17 @@ public class Export {
                 String ip = convertedObject.get("ip").getAsString().trim();
                 String mac = convertedObject.get("mac").getAsString().trim();
                 String risposte = convertedObject.get("risposte").getAsString().trim();
-                Date data = DateTimeFormat.forPattern(timestampSQL).parseDateTime(convertedObject.get("data").getAsString()).toDateTime().toDate();
+                Date data = DateTimeFormat.forPattern(TIMESTAMPSQL).parseDateTime(convertedObject.get("data").getAsString()).toDateTime().toDate();
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter();
                 AtomicInteger error = new AtomicInteger(0);
                 try {
-                    List<Survey_answer>  payload = objectMapper.readValue(jsoninput, objectMapper.getTypeFactory()
+                    List<Survey_answer> payload = objectMapper.readValue(jsoninput, objectMapper.getTypeFactory()
                             .constructCollectionType(List.class, Survey_answer.class));
 
                     payload.forEach(risposta -> {
-                        String host = risposta.getTipo().startsWith("N") ? host_NEET : host_DD;
+                        String host = risposta.getTipo().startsWith("N") ? HOSTNEET : HOSTDD;
                         Database db = new Database(host);
                         String out = db.inserisci_risposta(risposta);
                         db.closeDB();
@@ -234,7 +236,7 @@ public class Export {
                 }
 
                 Survey_answer risposta = new Survey_answer(idallievo, tipo, risposte, ip, mac, data);
-                String host = tipo.startsWith("N") ? host_NEET : host_DD;
+                String host = tipo.startsWith("N") ? HOSTNEET : HOSTDD;
 
                 Database db = new Database(host);
                 String out = db.inserisci_risposta(risposta);

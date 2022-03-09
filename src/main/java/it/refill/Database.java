@@ -4,13 +4,14 @@
  */
 package it.refill;
 
-import static it.refill.Utility.sdfITA;
+import static it.refill.Utility.PATTERNITA;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -20,15 +21,15 @@ import java.util.Properties;
  * @author Administrator
  */
 public class Database {
-
+    
     private Connection c = null;
-
+    
     public Database(String host) {
-
+        
         String driver = "com.mysql.cj.jdbc.Driver";
         String user = "bando";
         String password = "bando";
-
+        
         try {
             Class.forName(driver).newInstance();
             Properties p = new Properties();
@@ -46,29 +47,32 @@ public class Database {
                 try {
                     this.c.close();
                 } catch (Exception ex1) {
+                    ex1.printStackTrace();
                 }
             }
             this.c = null;
         }
     }
-
+    
     public void closeDB() {
         try {
             if (this.c != null) {
                 this.c.close();
             }
         } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
-
+    
     public Connection getConnection() {
         return c;
     }
-
+    
     public List<Docenti> list_docenti(boolean neet) {
+        SimpleDateFormat sdfITA = new SimpleDateFormat(PATTERNITA);
         List<Docenti> out = new ArrayList<>();
         try {
-            String sql0 = "SELECT d.iddocenti,d.cognome,d.nome,d.codicefiscale,d.datanascita,d.fascia,d.datawebinair "
+            String sql0 = "SELECT d.iddocenti,d.cognome,d.nome,d.codicefiscale,d.datanascita,d.fascia,d.datawebinair,d.email "
                     + "FROM docenti d WHERE d.stato='A' ORDER BY d.cognome";
             try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
@@ -83,16 +87,16 @@ public class Database {
                     if (!neet) {
                         piatt = "DD";
                     }
-
+                    String email = rs0.getString(8).toLowerCase();
                     List<Integer> idpr = new ArrayList<>();
-
+                    
                     String sql1 = "SELECT idprogetti_formativi FROM progetti_docenti WHERE iddocenti=" + iddocenti;
                     try (Statement st1 = this.c.createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
                         while (rs1.next()) {
                             idpr.add(rs1.getInt(1));
                         }
                     }
-
+                    
                     Docenti d1 = new Docenti();
                     d1.setCodicefiscale(codicefiscale);
                     d1.setCognome(cognome);
@@ -103,16 +107,19 @@ public class Database {
                     d1.setNome(nome);
                     d1.setPiattaforma(piatt);
                     d1.setIdpr(idpr);
+                    d1.setEmail(email);
                     out.add(d1);
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
-
+        
         return out;
     }
-
+    
     public List<Discenti> list_discenti(boolean neet) {
+        SimpleDateFormat sdfITA = new SimpleDateFormat(PATTERNITA);
         List<Discenti> out = new ArrayList<>();
         try {
             String sql0 = "SELECT a.idallievi,a.cognome,a.nome,a.codicefiscale,a.sesso,a.email,a.datanascita,a.comune_residenza,a.idprogetti_formativi "
@@ -144,13 +151,13 @@ public class Database {
                                 break;
                         }
                     }
-
+                    
                     String sql2 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs0.getInt(8);
                     try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
                         if (rs2.next()) {
                             String place_Provincia = rs2.getString(1).toUpperCase();
                             String place_Comune = rs2.getString(2).toUpperCase();
-
+                            
                             Discenti d1 = new Discenti();
                             d1.setCodicefiscale(codicefiscale);
                             d1.setCognome(cognome);
@@ -164,19 +171,21 @@ public class Database {
                             d1.setTarget(target);
                             d1.setIdpr(idpr);
                             out.add(d1);
-
+                            
                         }
                     }
                 }
             }
-
+            
         } catch (Exception e) {
+            e.printStackTrace();
         }
-
+        
         return out;
     }
-
+    
     public List<Pfstart> list_pfstart(boolean neet) {
+        SimpleDateFormat sdfITA = new SimpleDateFormat(PATTERNITA);
         List<Pfstart> out = new ArrayList<>();
         String TipoCorso;
         if (neet) {
@@ -184,7 +193,7 @@ public class Database {
         } else {
             TipoCorso = "DD";
         }
-
+        
         try {
             String sql0 = "SELECT idprogetti_formativi,start,idsoggetti_attuatori FROM progetti_formativi p WHERE p.stato IN ('DV','P','DC')";
             try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
@@ -206,7 +215,7 @@ public class Database {
                                     try (Statement st3 = this.c.createStatement(); ResultSet rs3 = st3.executeQuery(sql3)) {
                                         if (rs3.next()) {
                                             int PostiDisponibili = 12 - rs3.getInt(1);
-
+                                            
                                             Pfstart p1 = new Pfstart();
                                             p1.setComune(place_Comune);
                                             p1.setDatacorso(datacorso);
@@ -218,25 +227,26 @@ public class Database {
                                             p1.setTelSA(TelSA);
                                             p1.setTipoCorso(TipoCorso);
                                             out.add(p1);
-
+                                            
                                         }
                                     }
                                 }
                             }
                         }
                     }
-
+                    
                 }
             }
-
+            
         } catch (Exception e) {
-
+            e.printStackTrace();
+            
         }
-
+        
         return out;
         //
     }
-
+    
     public List<SA> list_sa(boolean neet) {
         List<SA> out = new ArrayList<>();
         String target;
@@ -248,12 +258,12 @@ public class Database {
         try {
             String h_accr;
             if (neet) {
-                h_accr = Utility.host_NEET_ACCR;
+                h_accr = Utility.HOSTNEETACCR;
             } else {
-                h_accr = Utility.host_DD_ACCR;
+                h_accr = Utility.HOSTDDACCR;
             }
             Database accr = new Database(h_accr);
-
+            
             String sql0 = "SELECT a.id,a.username,a.cellulare,a.mail,a.pivacf,a.societa,a.sedecomune "
                     + " FROM bando_neet_mcn a WHERE a.stato_domanda='A' AND a.dataupconvenzionefinale<>'-'";
             try (Statement st0 = accr.getConnection().createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
@@ -267,7 +277,7 @@ public class Database {
                         if (rs2.next()) {
                             String place_Provincia = rs2.getString(1);
                             String place_Comune = rs2.getString(2);
-
+                            
                             List<SedeFormazione> aule = new ArrayList<>();
                             String sql3 = "SELECT numaule,"
                                     + "mailresponsabile1,responsabile1,telresponsabile1,citta1,"
@@ -276,7 +286,7 @@ public class Database {
                                     + "mailresponsabile4,responsabile4,telresponsabile4,citta4,"
                                     + "mailresponsabile5,responsabile5,telresponsabile5,citta5 "
                                     + "FROM allegato_a a WHERE username='" + rs0.getString(2) + "'";
-
+                            
                             try (Statement st3 = accr.getConnection().createStatement(); ResultSet rs3 = st3.executeQuery(sql3)) {
                                 if (rs3.next()) {
                                     int numaule = Integer.parseInt(rs3.getString("numaule"));
@@ -300,14 +310,14 @@ public class Database {
                                                 aule.add(s1);
                                             }
                                         }
-
+                                        
                                     }
                                 }
-
+                                
                             }
-
+                            
                             SA sa = new SA();
-
+                            
                             sa.setAule(aule);
                             sa.setCellulare(telefono);
                             sa.setComune(place_Comune);
@@ -317,21 +327,22 @@ public class Database {
                             sa.setSocieta(societa);
                             sa.setTarget(target);
                             out.add(sa);
-
+                            
                         }
                     }
-
+                    
                 }
             }
-
+            
             accr.closeDB();
-
+            
         } catch (Exception e) {
+            e.printStackTrace();
         }
-
+        
         return out;
     }
-
+    
     public String inserisci_risposta(Survey_answer risposta) {
         try {
             String ins = "INSERT INTO survey_answer VALUES (?,?,?,?,?,?)";
@@ -353,5 +364,5 @@ public class Database {
             return e.getMessage();
         }
     }
-
+    
 }
