@@ -23,6 +23,7 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.element.Image;
+import com.itextpdf.signatures.CertificateInfo.X500Name;
 import com.itextpdf.signatures.PdfPKCS7;
 import com.itextpdf.signatures.SignatureUtil;
 import static it.refill.action.ActionB.getPath;
@@ -85,6 +86,9 @@ import org.apache.xmpbox.schema.DublinCoreSchema;
 import org.apache.xmpbox.schema.PDFAIdentificationSchema;
 import org.apache.xmpbox.type.BadFieldValueException;
 import org.apache.xmpbox.xml.XmpSerializer;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
@@ -532,8 +536,8 @@ public class Pdf_new {
             dbn.closeDB();
 
             File pdfOut = new File(pathtemp + username + dataconsegna.toString("ddMMyyyyHHmmSSS") + ".D.pdf");
-            try (InputStream is = new ByteArrayInputStream(decodeBase64(contentb64)); PdfReader reader = new PdfReader(is); 
-                    PdfWriter writer = new PdfWriter(pdfOut); 
+            try (InputStream is = new ByteArrayInputStream(decodeBase64(contentb64)); PdfReader reader = new PdfReader(is);
+                    PdfWriter writer = new PdfWriter(pdfOut);
                     PdfDocument pdfDoc = new PdfDocument(reader, writer)) {
                 PdfAcroForm form = getAcroForm(pdfDoc, true);
                 form.setGenerateAppearance(true);
@@ -576,7 +580,7 @@ public class Pdf_new {
             dbb.closeDB();
             createDir(pathtemp);
             File pdfOut = new File(pathtemp + username + dataconsegna.toString("ddMMyyyyHHmmSSS") + ".NO.pdf");
-            try (InputStream is = new ByteArrayInputStream(decodeBase64(contentb64));PdfReader reader = new PdfReader(is); PdfWriter writer = new PdfWriter(pdfOut); PdfDocument pdfDoc = new PdfDocument(reader, writer)) {
+            try (InputStream is = new ByteArrayInputStream(decodeBase64(contentb64)); PdfReader reader = new PdfReader(is); PdfWriter writer = new PdfWriter(pdfOut); PdfDocument pdfDoc = new PdfDocument(reader, writer)) {
                 PdfAcroForm form = getAcroForm(pdfDoc, true);
                 form.setGenerateAppearance(true);
                 Map<String, PdfFormField> fields = form.getFormFields();
@@ -844,6 +848,9 @@ public class Pdf_new {
                         doc.setErrore(e.getMessage());
                     }
                     if (doc.isValido()) {
+//                        System.out.println("it.refill.action.Pdf_new.extractSignatureInformation_P7M() "+ cert.getIssuerDN().getName());
+                        System.out.println("it.refill.action.Pdf_new.extractSignatureInformation_P7M() "+ cert.getIssuerX500Principal().getName());
+                           
 //                        String cf = substringBefore(substringAfter(principal.getName(), "SERIALNUMBER="), ", GIVENNAME");
                         doc.setCodicefiscale(principal.getName().toUpperCase());
                         doc.setContenuto((byte[]) cms.getSignedContent().getContent());
