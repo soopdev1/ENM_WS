@@ -12,9 +12,17 @@ import java.util.List;
  */
 public class SA {
    
-    String cellulare,mail,pivacf,societa,Provincia,Comune,target;
+    String cellulare,mail,pivacf,societa,Provincia,Comune,target,indirizzo;
     
     List<SedeFormazione> aule;
+
+    public String getIndirizzo() {
+        return indirizzo;
+    }
+
+    public void setIndirizzo(String indirizzo) {
+        this.indirizzo = indirizzo;
+    }
 
     public String getTarget() {
         return target;

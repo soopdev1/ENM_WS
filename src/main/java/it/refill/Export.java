@@ -91,7 +91,48 @@ public class Export {
             esito.add(mapesito);
             return Response.status(401).entity(new Gson().toJson(esito)).build();
         }
+    }
 
+    @POST
+    @Path("/list_pf_all")
+    @Produces("application/json")
+    public Response list_pf_all(@FormParam("username") String username, @FormParam("password") String password) {
+        if (username == null) {
+            username = "";
+        }
+        if (password == null) {
+            password = "";
+        }
+        if (checkcredentials(username, password)) {
+            List<Pfstart> out = new ArrayList<>();
+            //NEET
+            try {
+                Database db1 = new Database(HOSTNEET);
+                List<Pfstart> neet = db1.list_pf(true);
+                db1.closeDB();
+                out.addAll(neet);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //D&D
+            try {
+                Database db1 = new Database(HOSTDD);
+                List<Pfstart> ded = db1.list_pf(false);
+                db1.closeDB();
+                out.addAll(ded);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return Response.status(200).entity(new Gson().toJson(out)).build();
+        } else {
+            ArrayList<LinkedHashMap<String, String>> esito = new ArrayList<>();
+            LinkedHashMap<String, String> mapesito = Maps.newLinkedHashMap();
+            mapesito.put("result", "false");
+            mapesito.put("error", "unauthorized");
+            mapesito.put("error_description", "Credentials invalid");
+            esito.add(mapesito);
+            return Response.status(401).entity(new Gson().toJson(esito)).build();
+        }
     }
 
     @POST

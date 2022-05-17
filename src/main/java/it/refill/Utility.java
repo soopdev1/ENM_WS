@@ -6,6 +6,7 @@ package it.refill;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ResourceBundle;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -30,9 +31,10 @@ public class Utility {
     public static final DateTimeFormatter DTF = DateTimeFormat.forPattern(PATTERNSQL);
     public static final DateTimeFormatter DTFAD = DateTimeFormat.forPattern(TIMESTAMPFAD);
     public static final DateTimeFormatter DTFH = DateTimeFormat.forPattern(PATTERNHMIN);
-    public static final DateTimeFormatter DTFSQL = DateTimeFormat.forPattern(TIMESTAMPSQL);
-    public static final String HOSTNEET = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/enm_gestione_neet_prod";
-    public static final String HOSTDD = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/enm_gestione_dd_prod";
-    public static final String HOSTNEETACCR = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/enm_neet_prod";
-    public static final String HOSTDDACCR = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/enm_dd_prod";
+    public static final DateTimeFormatter DTFSQL = DateTimeFormat.forPattern(TIMESTAMPSQL);    
+    public static final ResourceBundle conf = ResourceBundle.getBundle("conf.conf");    
+    public static final String HOSTNEET = conf.getString("db.host") + ":3306/enm_gestione_neet_prod";
+    public static final String HOSTDD = conf.getString("db.host") + ":3306/enm_gestione_dd_prod";
+    public static final String HOSTNEETACCR = conf.getString("db.host") + ":3306/enm_neet_prod";
+    public static final String HOSTDDACCR = conf.getString("db.host") + ":3306/enm_dd_prod";
 }

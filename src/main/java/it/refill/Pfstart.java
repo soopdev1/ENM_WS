@@ -10,8 +10,46 @@ package it.refill;
  */
 public class Pfstart {
 
-    int idcorso,PostiDisponibili;
+    int idcorso, PostiDisponibili;
     String datacorso, TipoCorso, Provincia, Comune, SoggettoAttuatoreNome, TelSA, MailSA;
+    String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String statusing) {
+        if (statusing == null) {
+            this.status = "ERRORE";
+        } else {
+            switch (statusing.toUpperCase().trim()) {
+                case "DV":
+                case "P":
+                case "C":
+                    this.status = "IN PARTENZA";
+                    break;
+                case "ATA":
+                case "ATB":
+                case "SOA":
+                case "SOB":
+                case "DVA":
+                    this.status = "IN CORSO";
+                    break;
+                case "F":
+                case "DVB":
+                case "MA":
+                case "IV":
+                case "CK":
+                case "EVI":
+                case "CO":
+                    this.status = "CONCLUSO";
+                    break;
+                default:
+                    this.status = "ERRORE";
+                    break;
+            }
+        }
+    }
 
     public int getIdcorso() {
         return idcorso;
