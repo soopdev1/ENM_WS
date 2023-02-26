@@ -5,7 +5,9 @@
 package it.refill;
 
 import static it.refill.Utility.PATTERNITA;
+import static it.refill.Utility.TIMESTAMPSQL;
 import static it.refill.Utility.conf;
+import static it.refill.Utility.estraiEccezione;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -26,8 +29,6 @@ public class Database {
 
     private Connection c = null;
 
-    
-     
     public Database(String host) {
 
         String driver = "com.mysql.cj.jdbc.Driver";
@@ -46,12 +47,10 @@ public class Database {
             p.put("useUnicode", "true");
             this.c = DriverManager.getConnection("jdbc:mysql://" + host, p);
         } catch (Exception ex) {
-            ex.printStackTrace();
             if (this.c != null) {
                 try {
                     this.c.close();
                 } catch (Exception ex1) {
-                    ex1.printStackTrace();
                 }
             }
             this.c = null;
@@ -63,8 +62,7 @@ public class Database {
             if (this.c != null) {
                 this.c.close();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
         }
     }
 
@@ -78,7 +76,7 @@ public class Database {
         try {
             String sql0 = "SELECT d.iddocenti,d.cognome,d.nome,d.codicefiscale,d.datanascita,d.fascia,d.datawebinair,d.email "
                     + "FROM docenti d WHERE d.stato='A' ORDER BY d.cognome";
-            try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+            try ( Statement st0 = this.c.createStatement();  ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
                     int iddocenti = rs0.getInt(1);
                     String cognome = rs0.getString(2).toUpperCase();
@@ -95,7 +93,7 @@ public class Database {
                     List<Integer> idpr = new ArrayList<>();
 
                     String sql1 = "SELECT idprogetti_formativi FROM progetti_docenti WHERE iddocenti=" + iddocenti;
-                    try (Statement st1 = this.c.createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
+                    try ( Statement st1 = this.c.createStatement();  ResultSet rs1 = st1.executeQuery(sql1)) {
                         while (rs1.next()) {
                             idpr.add(rs1.getInt(1));
                         }
@@ -116,7 +114,7 @@ public class Database {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            insertTR("E", "SERVICE", estraiEccezione(e));
         }
 
         return out;
@@ -132,7 +130,7 @@ public class Database {
                 sql0 = "SELECT a.idallievi,a.cognome,a.nome,a.codicefiscale,a.sesso,a.email,a.datanascita,a.comune_residenza,a.target,a.idprogetti_formativi "
                         + "FROM allievi a WHERE a.idprogetti_formativi IS NOT NULL AND a.id_statopartecipazione='01' ORDER BY a.cognome";
             }
-            try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+            try ( Statement st0 = this.c.createStatement();  ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
                     int idpr = rs0.getInt("a.idprogetti_formativi");
                     int idallievi = rs0.getInt(1);
@@ -157,7 +155,7 @@ public class Database {
                     }
 
                     String sql2 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs0.getInt(8);
-                    try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
+                    try ( Statement st2 = this.c.createStatement();  ResultSet rs2 = st2.executeQuery(sql2)) {
                         if (rs2.next()) {
                             String place_Provincia = rs2.getString(1).toUpperCase();
                             String place_Comune = rs2.getString(2).toUpperCase();
@@ -182,7 +180,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            insertTR("E", "SERVICE", estraiEccezione(e));
         }
 
         return out;
@@ -200,23 +198,23 @@ public class Database {
 
         try {
             String sql0 = "SELECT idprogetti_formativi,start,idsoggetti_attuatori FROM progetti_formativi p WHERE p.stato IN ('DV','P','DC')";
-            try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+            try ( Statement st0 = this.c.createStatement();  ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
                     int idcorso = rs0.getInt(1);
                     String datacorso = sdfITA.format(rs0.getDate(2));
                     String sql1 = "SELECT ragionesociale,cell_sa,email,comune FROM soggetti_attuatori WHERE idsoggetti_attuatori = " + rs0.getInt(3);
-                    try (Statement st1 = this.c.createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
+                    try ( Statement st1 = this.c.createStatement();  ResultSet rs1 = st1.executeQuery(sql1)) {
                         if (rs1.next()) {
                             String SoggettoAttuatoreNome = rs1.getString(1).toUpperCase();
                             String TelSA = rs1.getString(2);
                             String MailSA = rs1.getString(3).toLowerCase();
                             String sql2 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs1.getInt(4);
-                            try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
+                            try ( Statement st2 = this.c.createStatement();  ResultSet rs2 = st2.executeQuery(sql2)) {
                                 if (rs2.next()) {
                                     String place_Provincia = rs2.getString(1);
                                     String place_Comune = rs2.getString(2);
                                     String sql3 = "SELECT COUNT(*) FROM allievi WHERE idprogetti_formativi = " + idcorso + " AND id_statopartecipazione = '01'";
-                                    try (Statement st3 = this.c.createStatement(); ResultSet rs3 = st3.executeQuery(sql3)) {
+                                    try ( Statement st3 = this.c.createStatement();  ResultSet rs3 = st3.executeQuery(sql3)) {
                                         if (rs3.next()) {
                                             int PostiDisponibili = 12 - rs3.getInt(1);
 
@@ -243,8 +241,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-
+            insertTR("E", "SERVICE", estraiEccezione(e));
         }
 
         return out;
@@ -263,24 +260,24 @@ public class Database {
 
         try {
             String sql0 = "SELECT idprogetti_formativi,start,idsoggetti_attuatori,stato FROM progetti_formativi p ORDER BY START desc";
-            try (Statement st0 = this.c.createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+            try ( Statement st0 = this.c.createStatement();  ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
                     int idcorso = rs0.getInt(1);
                     String datacorso = sdfITA.format(rs0.getDate(2));
                     String status = rs0.getString(4);
                     String sql1 = "SELECT ragionesociale,cell_sa,email,comune FROM soggetti_attuatori WHERE idsoggetti_attuatori = " + rs0.getInt(3);
-                    try (Statement st1 = this.c.createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
+                    try ( Statement st1 = this.c.createStatement();  ResultSet rs1 = st1.executeQuery(sql1)) {
                         if (rs1.next()) {
                             String SoggettoAttuatoreNome = rs1.getString(1).toUpperCase();
                             String TelSA = rs1.getString(2);
                             String MailSA = rs1.getString(3).toLowerCase();
                             String sql2 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs1.getInt(4);
-                            try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
+                            try ( Statement st2 = this.c.createStatement();  ResultSet rs2 = st2.executeQuery(sql2)) {
                                 if (rs2.next()) {
                                     String place_Provincia = rs2.getString(1);
                                     String place_Comune = rs2.getString(2);
                                     String sql3 = "SELECT COUNT(*) FROM allievi WHERE idprogetti_formativi = " + idcorso + " AND id_statopartecipazione = '01'";
-                                    try (Statement st3 = this.c.createStatement(); ResultSet rs3 = st3.executeQuery(sql3)) {
+                                    try ( Statement st3 = this.c.createStatement();  ResultSet rs3 = st3.executeQuery(sql3)) {
                                         if (rs3.next()) {
                                             int PostiDisponibili = 0;
                                             if (status.equals("DV") || status.equals("P") || status.equals("C")) {
@@ -310,8 +307,7 @@ public class Database {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-
+            insertTR("E", "SERVICE", estraiEccezione(e));
         }
 
         return out;
@@ -340,7 +336,7 @@ public class Database {
 
             String sql0 = "SELECT a.id,a.username,a.cellulare,a.mail,a.pivacf,a.societa,a.sedecomune,a.sedeindirizzo "
                     + " FROM " + table + " a WHERE a.stato_domanda='A' AND a.dataupconvenzionefinale<>'-'";
-            try (Statement st0 = accr.getConnection().createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+            try ( Statement st0 = accr.getConnection().createStatement();  ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
                     String telefono = rs0.getString(3);
                     String mail = rs0.getString(4).toLowerCase();
@@ -349,7 +345,7 @@ public class Database {
                     String place_Indirizzo = rs0.getString(8).toUpperCase();
 
                     String sql2 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs0.getInt(7);
-                    try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
+                    try ( Statement st2 = this.c.createStatement();  ResultSet rs2 = st2.executeQuery(sql2)) {
                         if (rs2.next()) {
                             String place_Provincia = rs2.getString(1);
                             String place_Comune = rs2.getString(2);
@@ -363,7 +359,7 @@ public class Database {
                                     + "mailresponsabile5,responsabile5,telresponsabile5,citta5 "
                                     + "FROM allegato_a a WHERE username='" + rs0.getString(2) + "'";
 
-                            try (Statement st3 = accr.getConnection().createStatement(); ResultSet rs3 = st3.executeQuery(sql3)) {
+                            try ( Statement st3 = accr.getConnection().createStatement();  ResultSet rs3 = st3.executeQuery(sql3)) {
                                 if (rs3.next()) {
                                     int numaule = Integer.parseInt(rs3.getString("numaule"));
                                     for (int i = 1; i <= numaule; i++) {
@@ -372,7 +368,7 @@ public class Database {
                                         String cellulare = rs3.getString("telresponsabile" + i);
                                         String email = rs3.getString("mailresponsabile" + i);
                                         String sql4 = "SELECT nome_provincia,nome FROM comuni WHERE idcomune = " + rs3.getInt("citta" + i);
-                                        try (Statement st4 = this.c.createStatement(); ResultSet rs4 = st4.executeQuery(sql4)) {
+                                        try ( Statement st4 = this.c.createStatement();  ResultSet rs4 = st4.executeQuery(sql4)) {
                                             if (rs4.next()) {
                                                 String aula_Provincia = rs4.getString(1);
                                                 String aula_Comune = rs4.getString(2);
@@ -414,7 +410,7 @@ public class Database {
             accr.closeDB();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            insertTR("E", "SERVICE", estraiEccezione(e));
         }
 
         return out;
@@ -423,7 +419,7 @@ public class Database {
     public String inserisci_risposta(Survey_answer risposta) {
         try {
             String ins = "INSERT INTO survey_answer VALUES (?,?,?,?,?,?)";
-            try (PreparedStatement ps = this.c.prepareStatement(ins)) {
+            try ( PreparedStatement ps = this.c.prepareStatement(ins)) {
                 ps.setLong(1, risposta.getIdallievo());
                 ps.setString(2, risposta.getTipo());
                 ps.setString(3, risposta.getRisposte());
@@ -437,9 +433,32 @@ public class Database {
             if (e.getMessage().toLowerCase().contains("duplicate")) {
                 return "0";
             }
-            e.printStackTrace();
+            insertTR("E", "SERVICE", estraiEccezione(e));
             return e.getMessage();
         }
     }
 
+    public void insertTR(String type, String user, String descr) {
+        try {
+            PreparedStatement ps = this.c.prepareStatement("INSERT INTO tracking (azione,iduser,timestamp) VALUES (?,?,?)");
+            ps.setString(1, descr);
+            ps.setString(2, user);
+            ps.setString(3, getNow());
+            ps.execute();
+        } catch (SQLException ex) {
+        }
+    }
+
+    public String getNow() {
+        try {
+            String sql = "SELECT now()";
+            PreparedStatement ps = this.c.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+        } catch (Exception ex) {
+        }
+        return new DateTime().toString(TIMESTAMPSQL);
+    }
 }

@@ -10,6 +10,8 @@ import com.google.gson.JsonObject;
 import static it.refill.Utility.HOSTDD;
 import static it.refill.Utility.HOSTNEET;
 import static it.refill.Utility.TIMESTAMPSQL;
+import static it.refill.Utility.estraiEccezione;
+import static it.refill.Utility.insertTR;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -70,7 +72,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(neet);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             //D&D
             try {
@@ -79,7 +81,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(ded);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             return Response.status(200).entity(new Gson().toJson(out)).build();
         } else {
@@ -112,7 +114,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(neet);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             //D&D
             try {
@@ -121,7 +123,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(ded);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             return Response.status(200).entity(new Gson().toJson(out)).build();
         } else {
@@ -148,7 +150,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(neet);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             //D&D
             try {
@@ -157,7 +159,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(ded);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             return Response.status(200).entity(new Gson().toJson(out)).build();
         } else {
@@ -184,7 +186,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(neet);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             //D&D
             try {
@@ -193,7 +195,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(ded);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             return Response.status(200).entity(new Gson().toJson(out)).build();
         } else {
@@ -220,7 +222,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(neet);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             //D&D
             try {
@@ -229,7 +231,7 @@ public class Export {
                 db1.closeDB();
                 out.addAll(ded);
             } catch (Exception e) {
-                e.printStackTrace();
+                insertTR("E", "SERVICE", estraiEccezione(e));
             }
             return Response.status(200).entity(new Gson().toJson(out)).build();
         } else {
@@ -268,12 +270,12 @@ public class Export {
                     payload.forEach(risposta -> {
                         String host = risposta.getTipo().startsWith("N") ? HOSTNEET : HOSTDD;
                         Database db = new Database(host);
-                        String out = db.inserisci_risposta(risposta);
+                        db.inserisci_risposta(risposta);
                         db.closeDB();
                     });
 
                 } catch (Exception ex1) {
-                    ex1.printStackTrace();
+                    insertTR("E", "SERVICE", estraiEccezione(ex1));
                 }
 
                 Survey_answer risposta = new Survey_answer(idallievo, tipo, risposte, ip, mac, data);

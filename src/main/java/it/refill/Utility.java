@@ -7,6 +7,7 @@ package it.refill;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -31,10 +32,30 @@ public class Utility {
     public static final DateTimeFormatter DTF = DateTimeFormat.forPattern(PATTERNSQL);
     public static final DateTimeFormatter DTFAD = DateTimeFormat.forPattern(TIMESTAMPFAD);
     public static final DateTimeFormatter DTFH = DateTimeFormat.forPattern(PATTERNHMIN);
-    public static final DateTimeFormatter DTFSQL = DateTimeFormat.forPattern(TIMESTAMPSQL);    
-    public static final ResourceBundle conf = ResourceBundle.getBundle("conf.conf");    
+    public static final DateTimeFormatter DTFSQL = DateTimeFormat.forPattern(TIMESTAMPSQL);
+    public static final ResourceBundle conf = ResourceBundle.getBundle("conf.conf");
     public static final String HOSTNEET = conf.getString("db.host") + ":3306/enm_gestione_neet_prod";
     public static final String HOSTDD = conf.getString("db.host") + ":3306/enm_gestione_dd_prod";
     public static final String HOSTNEETACCR = conf.getString("db.host") + ":3306/enm_neet_prod";
     public static final String HOSTDDACCR = conf.getString("db.host") + ":3306/enm_dd_prod";
+
+    public static void insertTR(String type, String user, String descr) {
+        try {
+            Database db = new Database(HOSTNEET);
+            db.insertTR(type, user, descr);
+            db.closeDB();
+        } catch (Exception e) {
+        }
+    }
+
+    public static String estraiEccezione(Exception ec1) {
+        try {
+            String stack_nam = ec1.getStackTrace()[0].getMethodName();
+            String stack_msg = ExceptionUtils.getStackTrace(ec1);
+            return stack_nam + " - " + stack_msg;
+        } catch (Exception e) {
+        }
+        return ec1.getMessage();
+
+    }
 }
